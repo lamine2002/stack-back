@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('answer_validations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('answer_id')->constrained('answers');
-            $table->foreignId('supervisor_id ')->constrained('users');
+            $table->foreignId('supervisor_id')->constrained('users');
             $table->timestamps();
         });
     }
