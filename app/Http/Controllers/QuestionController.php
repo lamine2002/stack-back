@@ -15,7 +15,8 @@ class QuestionController extends Controller
     public function index()
     {
         try {
-            $questions = Question::all();
+            // recuperer les questions avec les tags et les reponses associees
+            $questions = Question::with('tags', 'answers')->get();
             return response()->json([
                 'questions' => $questions,
                 'message' => 'Donnees recuperees avec succes',
