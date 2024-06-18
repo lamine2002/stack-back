@@ -11,7 +11,7 @@ class AnswerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class AnswerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'question_id' => 'required|exists:questions,id',
+            'user_id' => 'required|exists:users,id',
+            'body' => 'required|string',
+            'is_validated' => 'boolean|nullable',
+            'votes' => 'integer|nullable'
         ];
     }
 }
