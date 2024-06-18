@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Question;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
@@ -9,9 +10,22 @@ class QuestionController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
-        //
+        try {
+            $questions = Question::all();
+            return response()->json([
+                'questions' => $questions,
+                'message' => 'Donnees recuperees avec succes',
+                'status' => 200
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la recuperation des donnees',
+                'status' => 500
+            ], 500);
+        }
     }
 
     /**
@@ -58,6 +72,11 @@ class QuestionController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
+    {
+        //
+    }
+
+    public function is_validated($request)
     {
         //
     }
