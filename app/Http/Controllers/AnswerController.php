@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnswerRequest;
 use App\Http\Requests\ValidateAnswerRequest;
 use App\Models\Answer;
+use App\Models\AnswerValidation;
 use App\Models\Question;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -139,8 +140,13 @@ class AnswerController extends Controller
             }
             $answer->is_validated = true;
             $answer->save();
+            $answerValidation = AnswerValidation::create([
+                'answer_id' => $answer->id,
+                'supervisor_id' => $request->validated('supervisor_id')
+            ]);
             return response()->json([
                 'answer' => $answer,
+                'answer_validation' => $answerValidation,
                 'message' => 'Reponse validee avec succes',
                 'status' => 200
             ], 200);
