@@ -75,11 +75,10 @@ class QuestionController extends Controller
     public function show(string $id)
     {
         try {
-            $question = Question::find($id);
-            $answers = $question->answers;
+            $question = Question::with('tags', 'answers')->find($id);
+
             return response()->json([
                 'question' => $question,
-                'answers' => $answers,
                 'message' => 'Donnees recuperees avec succes',
                 'status' => 200
             ], 200);
@@ -117,8 +116,13 @@ class QuestionController extends Controller
     public function update(QuestionRequest $request, string $id)
     {
         try {
-            $question = Question::find($id);
-            $question->update($request->validated());
+            $question = Question::with('tags')->find($id);
+            $question->update([
+                'title' => $request->validated('title'),
+                'body' => $request->validated('body'),
+                'user_id' => $request->validated('user_id')
+            ]);
+            $question->tags()->sync($request->validated('tags'));
             return response()->json([
                 'question' => $question,
                 'message' => 'Question modifiee avec succes',
