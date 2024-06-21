@@ -131,6 +131,7 @@ class AnswerController extends Controller
         $answer->is_validated = true;
         $answer->save();
         return response()->json([
+            'answer' => $answer,
             'message' => 'Reponse validee avec succes',
             'status' => 200
         ], 200);

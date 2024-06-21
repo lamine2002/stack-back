@@ -14,6 +14,7 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('questions', QuestionController::class);
 Route::apiResource('answers', AnswerController::class);
+Route::put('answers/{answer}/validate', [AnswerController::class, 'is_validated']);
 Route::apiResource('tags', TagController::class);
 Route::apiResource('users', UserController::class);
 
