@@ -152,4 +152,38 @@ class AnswerController extends Controller
         }
 
     }
+
+    public function incrementVote(Answer $answer)
+    {
+        try {
+            $answer->increment('votes');
+            return response()->json([
+                'answer' => $answer,
+                'message' => 'Vote ajoute avec succes',
+                'status' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'ajout du vote',
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    public function decrementVote(Answer $answer)
+    {
+        try {
+            $answer->decrement('votes');
+            return response()->json([
+                'answer' => $answer,
+                'message' => 'Vote retire avec succes',
+                'status' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors du retrait du vote',
+                'status' => 500
+            ], 500);
+        }
+    }
 }

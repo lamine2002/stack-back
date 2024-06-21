@@ -15,6 +15,8 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('questions', QuestionController::class);
 Route::apiResource('answers', AnswerController::class);
 Route::put('answers/{answer}/validate', [AnswerController::class, 'is_validated']);
+Route::put('answers/{answer}/incrementvote', [AnswerController::class, 'incrementVote']);
+Route::put('answers/{answer}/decrementvote', [AnswerController::class, 'decrementVote']);
 Route::apiResource('tags', TagController::class);
 Route::apiResource('users', UserController::class);
 
