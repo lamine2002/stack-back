@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AnswerRequest;
+use App\Http\Requests\ValidateAnswerRequest;
 use App\Models\Answer;
 use App\Models\Question;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AnswerController extends Controller
@@ -126,14 +128,28 @@ class AnswerController extends Controller
         }
     }
 
-    public function is_validated(Answer $answer)
+    public function is_validated(ValidateAnswerRequest $request, Answer $answer)
     {
-        $answer->is_validated = true;
-        $answer->save();
-        return response()->json([
-            'answer' => $answer,
-            'message' => 'Reponse validee avec succes',
-            'status' => 200
-        ], 200);
+        try {
+            if (User::where('id', $request->supervisor_id)->first()->role !== 'supervisor') {
+                return response()->json([
+                    'message' => 'Vous n\'etes pas un superviseur',
+                    'status' => 403
+                ], 403);
+            }
+            $answer->is_validated = true;
+            $answer->save();
+            return response()->json([
+                'answer' => $answer,
+                'message' => 'Reponse validee avec succes',
+                'status' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la validation de la reponse',
+                'status' => 500
+            ], 500);
+        }
+
     }
 }
