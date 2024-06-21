@@ -125,4 +125,14 @@ class AnswerController extends Controller
             ], 500);
         }
     }
+
+    public function is_validated(Answer $answer)
+    {
+        $answer->is_validated = true;
+        $answer->save();
+        return response()->json([
+            'message' => 'Reponse validee avec succes',
+            'status' => 200
+        ], 200);
+    }
 }
