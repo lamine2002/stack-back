@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('answer_id')->constrained('answers');
             $table->foreignId('user_id')->constrained('users');
+            $table->boolean('increment_vote')->default(false);
+            $table->boolean('decrement_vote')->default(false);
             $table->timestamps();
         });
     }

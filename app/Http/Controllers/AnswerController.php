@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AnswerRequest;
+use App\Http\Requests\AnswerVoteRequest;
 use App\Http\Requests\ValidateAnswerRequest;
 use App\Models\Answer;
 use App\Models\AnswerValidation;
+use App\Models\AnswerVote;
 use App\Models\Question;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -129,7 +131,7 @@ class AnswerController extends Controller
         }
     }
 
-    public function is_validated(ValidateAnswerRequest $request, Answer $answer)
+    /*public function is_validated(ValidateAnswerRequest $request, Answer $answer)
     {
         try {
             if (User::where('id', $request->supervisor_id)->first()->role !== 'supervisor') {
@@ -157,11 +159,55 @@ class AnswerController extends Controller
             ], 500);
         }
 
-    }
+    }*/
 
     public function incrementVote(Answer $answer)
     {
         try {
+            // Recuperer l'utilisateur qui a vote
+            $user = Auth()->user();
+            // Verifier si l'utilisateur est un superviseur
+            if ($user->role !== 'supervisor') {
+                return response()->json([
+                    'message' => 'Il faut avoir 10 de reputation pour voter pour une reponse',
+                    'status' => 403
+                ], 403);
+            }
+//            return $user;
+            // Verifier si l'utilisateur a deja vote pour cette reponse
+            if ($answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+                // Verifier si l'utilisateur a deja vote pour cette reponse en decrementant le vote
+                if ($answerVote->decrement_vote) {
+                    $answerVote->decrement_vote = false;
+                    $answerVote->increment_vote = false;
+                    $answerVote->save();
+                    $answer->increment('votes');
+                    return response()->json([
+                        'answer' => $answer,
+                        'message' => 'Vote ajoute avec succes',
+                        'status' => 200
+                    ], 200);
+                } else if (!$answerVote->increment_vote) {
+                    $answerVote->increment_vote = true;
+                    $answerVote->save();
+                    $answer->increment('votes');
+                    return response()->json([
+                        'answer' => $answer,
+                        'message' => 'Vote ajoute avec succes',
+                        'status' => 200
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'message' => 'Vous avez deja vote pour cette reponse',
+                        'status' => 403
+                    ], 403);
+                }
+            }
+            // Ajouter l'utilisateur a la liste des votants pour cette reponse
+            AnswerVote::create([
+                'user_id' => $user->id,
+                'answer_id' => $answer->id
+            ]);
             $answer->increment('votes');
             return response()->json([
                 'answer' => $answer,
@@ -179,15 +225,59 @@ class AnswerController extends Controller
     public function decrementVote(Answer $answer)
     {
         try {
+            // Recuperer l'utilisateur qui a vote
+            $user = Auth()->user();
+            // Verifier si l'utilisateur est un superviseur
+            if ($user->role !== 'supervisor') {
+                return response()->json([
+                    'message' => 'Il faut avoir 10 de reputation pour voter pour une reponse',
+                    'status' => 403
+                ], 403);
+            }
+            // Verifier si l'utilisateur a deja vote pour cette reponse
+            if ($answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+                // Verifier si l'utilisateur a deja vote pour cette reponse en incrementant le vote
+                if ($answerVote->increment_vote) {
+                    $answerVote->increment_vote = false;
+                    $answerVote->decrement_vote = false;
+                    $answerVote->save();
+                    $answer->decrement('votes');
+                    return response()->json([
+                        'answer' => $answer,
+                        'message' => 'Vote retire avec succes',
+                        'status' => 200
+                    ], 200);
+                } else if (!$answerVote->decrement_vote) {
+                    $answerVote->decrement_vote = true;
+                    $answerVote->save();
+                    $answer->decrement('votes');
+                    return response()->json([
+                        'answer' => $answer,
+                        'message' => 'Vote retire avec succes',
+                        'status' => 200
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'message' => 'Vous avez deja vote pour cette reponse',
+                        'status' => 403
+                    ], 403);
+                }
+            }
+            // Ajouter l'utilisateur a la liste des votants pour cette reponse
+            $answerVote = AnswerVote::create([
+                'user_id' => $user->id,
+                'answer_id' => $answer->id
+            ]);
             $answer->decrement('votes');
             return response()->json([
                 'answer' => $answer,
+                'answer_vote' => $answerVote,
                 'message' => 'Vote retire avec succes',
                 'status' => 200
             ], 200);
         }catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erreur lors du retrait du vote',
+                'message' => 'Erreur lors de la suppression du vote',
                 'status' => 500
             ], 500);
         }
