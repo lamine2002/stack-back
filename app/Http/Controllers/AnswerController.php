@@ -228,7 +228,7 @@ class AnswerController extends Controller
             // Recuperer l'utilisateur qui a vote
             $user = Auth()->user();
             // Verifier si l'utilisateur est un superviseur
-            if ($user->role !== 'supervisor') {
+            if ($user->role !== 'supervisor' && $user->role !== 'admin') {
                 return response()->json([
                     'message' => 'Il faut avoir 10 de reputation pour voter pour une reponse',
                     'status' => 403
