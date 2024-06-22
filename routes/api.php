@@ -16,7 +16,7 @@ Route::apiResource('questions', QuestionController::class);
 Route::apiResource('answers', AnswerController::class);
 //Route::put('answers/{answer}/validate', [AnswerController::class, 'is_validated']);
 Route::put('answers/{answer}/incrementvote', [AnswerController::class, 'incrementVote'])->middleware('auth:sanctum');
-Route::put('answers/{answer}/decrementvote', [AnswerController::class, 'decrementVote']);
+Route::put('answers/{answer}/decrementvote', [AnswerController::class, 'decrementVote'])->middleware('auth:sanctum');
 Route::apiResource('tags', TagController::class);
 Route::apiResource('users', UserController::class);
 

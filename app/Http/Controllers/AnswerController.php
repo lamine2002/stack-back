@@ -175,7 +175,9 @@ class AnswerController extends Controller
             }
 //            return $user;
             // Verifier si l'utilisateur a deja vote pour cette reponse
-            if ($answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+            if (AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+                $answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->first();
+//                return $answerVote;
                 // Verifier si l'utilisateur a deja vote pour cette reponse en decrementant le vote
                 if ($answerVote->decrement_vote) {
                     $answerVote->decrement_vote = false;
@@ -206,7 +208,9 @@ class AnswerController extends Controller
             // Ajouter l'utilisateur a la liste des votants pour cette reponse
             AnswerVote::create([
                 'user_id' => $user->id,
-                'answer_id' => $answer->id
+                'answer_id' => $answer->id,
+                'increment_vote' => true,
+                'decrement_vote' => false
             ]);
             $answer->increment('votes');
             return response()->json([
@@ -235,7 +239,8 @@ class AnswerController extends Controller
                 ], 403);
             }
             // Verifier si l'utilisateur a deja vote pour cette reponse
-            if ($answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+            if (AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->exists()) {
+                $answerVote = AnswerVote::where('user_id', $user->id)->where('answer_id', $answer->id)->first();
                 // Verifier si l'utilisateur a deja vote pour cette reponse en incrementant le vote
                 if ($answerVote->increment_vote) {
                     $answerVote->increment_vote = false;
@@ -266,7 +271,9 @@ class AnswerController extends Controller
             // Ajouter l'utilisateur a la liste des votants pour cette reponse
             $answerVote = AnswerVote::create([
                 'user_id' => $user->id,
-                'answer_id' => $answer->id
+                'answer_id' => $answer->id,
+                'increment_vote' => false,
+                'decrement_vote' => true
             ]);
             $answer->decrement('votes');
             return response()->json([
