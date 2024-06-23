@@ -4,16 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\QuestionRequest;
 use App\Models\Question;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class QuestionController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
 
     public function index()
     {
+        if (Gate::denies('viewAny', Question::class)) {
+//            return 'Vous n\'avez pas la permission de voir les questions';
+            return response()->json([
+                'message' => 'Vous n\'avez pas la permission de voir les questions',
+                'status' => 403
+            ], 403);
+        }
         try {
             // recuperer les questions avec les tags et les reponses associees
             $questions = Question::with('tags', 'answers')->get();
@@ -76,7 +86,18 @@ class QuestionController extends Controller
     {
         try {
             $question = Question::with('tags', 'answers')->find($id);
-
+            if (!$question) {
+                return response()->json([
+                    'message' => 'Question non trouvee',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('view', $question)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de voir cette question',
+                    'status' => 403
+                ], 403);
+            }
             return response()->json([
                 'question' => $question,
                 'message' => 'Donnees recuperees avec succes',
@@ -97,6 +118,18 @@ class QuestionController extends Controller
     {
         try {
             $question = Question::find($id);
+            if (!$question) {
+                return response()->json([
+                    'message' => 'Question non trouvee',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('update', $question)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de modifier cette question',
+                    'status' => 403
+                ], 403);
+            }
             return response()->json([
                 'question' => $question,
                 'message' => 'Donnees recuperees avec succes',
@@ -117,6 +150,18 @@ class QuestionController extends Controller
     {
         try {
             $question = Question::with('tags')->find($id);
+            if (!$question) {
+                return response()->json([
+                    'message' => 'Question non trouvee',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('update', $question)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de modifier cette question',
+                    'status' => 403
+                ], 403);
+            }
             $question->update([
                 'title' => $request->validated('title'),
                 'body' => $request->validated('body'),
@@ -143,6 +188,18 @@ class QuestionController extends Controller
     {
         try {
             $question = Question::find($id);
+            if (!$question) {
+                return response()->json([
+                    'message' => 'Question non trouvee',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('delete', $question)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de supprimer cette question',
+                    'status' => 403
+                ], 403);
+            }
             $question->delete();
             return response()->json([
                 'message' => 'Question supprimee avec succes',

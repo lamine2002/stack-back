@@ -10,6 +10,7 @@ use App\Models\AnswerValidation;
 use App\Models\AnswerVote;
 use App\Models\Question;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 
 class AnswerController extends Controller
@@ -36,6 +37,12 @@ class AnswerController extends Controller
     public function store(AnswerRequest $request)
     {
         try {
+            if (Gate::denies('create', Answer::class)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de creer une reponse',
+                    'status' => 403
+                ], 403);
+            }
             $answer = Answer::create($request->validated());
             return response()->json([
                 'answer' => $answer,
@@ -75,19 +82,19 @@ class AnswerController extends Controller
      */
     public function edit(string $id)
     {
-        try {
-            $answer = Answer::find($id);
-            return response()->json([
-                'answer' => $answer,
-                'message' => 'Reponse recuperee avec succes',
-                'status' => 200
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors de la recuperation de la reponse',
-                'status' => 500
-            ], 500);
-        }
+//        try {
+//            $answer = Answer::find($id);
+//            return response()->json([
+//                'answer' => $answer,
+//                'message' => 'Reponse recuperee avec succes',
+//                'status' => 200
+//            ], 200);
+//        } catch (\Exception $e) {
+//            return response()->json([
+//                'message' => 'Erreur lors de la recuperation de la reponse',
+//                'status' => 500
+//            ], 500);
+//        }
     }
 
     /**
@@ -97,6 +104,18 @@ class AnswerController extends Controller
     {
         try {
             $answer = Answer::find($id);
+            if (!$answer) {
+                return response()->json([
+                    'message' => 'Reponse introuvable',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('update', $answer)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de modifier cette reponse',
+                    'status' => 403
+                ], 403);
+            }
             $answer->update($request->validated());
             return response()->json([
                 'answer' => $answer,
@@ -118,6 +137,18 @@ class AnswerController extends Controller
     {
         try {
             $answer = Answer::find($id);
+            if (!$answer) {
+                return response()->json([
+                    'message' => 'Reponse introuvable',
+                    'status' => 404
+                ], 404);
+            }
+            if (Gate::denies('delete', $answer)) {
+                return response()->json([
+                    'message' => 'Vous n\'avez pas la permission de supprimer cette reponse',
+                    'status' => 403
+                ], 403);
+            }
             $answer->delete();
             return response()->json([
                 'message' => 'Reponse supprimee avec succes',
@@ -166,7 +197,14 @@ class AnswerController extends Controller
         try {
             // Recuperer l'utilisateur qui a vote
             $user = Auth()->user();
-            // Verifier si l'utilisateur est un superviseur
+            // Verifier si l'utilisateur est connecte
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Vous devez etre connecte pour voter pour une reponse',
+                    'status' => 403
+                ], 403);
+            }
+            // Verifier si l'utilisateur est un superviseur ou un admin
             if ($user->role !== 'supervisor' && $user->role !== 'admin') {
                 return response()->json([
                     'message' => 'Il faut avoir 10 de reputation pour voter pour une reponse',
