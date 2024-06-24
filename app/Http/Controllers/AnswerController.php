@@ -37,6 +37,31 @@ class AnswerController extends Controller
     public function store(AnswerRequest $request)
     {
         try {
+            // Récupérer l'utilisateur connecté
+            $user = auth()->user();
+
+            // Récupérer la question à laquelle on veut répondre
+            $question = Question::find($request->question_id);
+
+            // Vérifier si la question existe
+            if (!$question) {
+                return response()->json([
+                    'message' => 'Question introuvable',
+                    'status' => 404
+                ], 404);
+            }
+
+            // Vérifier si la question a été posée par un superviseur
+            if ($question->user->role === 'supervisor') {
+                // Vérifier si l'utilisateur connecté est un superviseur
+                if ($user->role !== 'supervisor') {
+                    return response()->json([
+                        'message' => 'Seuls les superviseurs peuvent répondre aux questions posées par les superviseurs',
+                        'status' => 403
+                    ], 403);
+                }
+            }
+
             if (Gate::denies('create', Answer::class)) {
                 return response()->json([
                     'message' => 'Vous n\'avez pas la permission de creer une reponse',
