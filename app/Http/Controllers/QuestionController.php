@@ -26,7 +26,7 @@ class QuestionController extends Controller
         }
         try {
             // recuperer les questions avec les tags et les reponses associees
-            $questions = Question::with('tags', 'answers')->get();
+            $questions = Question::with(['tags', 'answers.user', 'user'])->get();
             return response()->json([
                 'questions' => $questions,
                 'message' => 'Donnees recuperees avec succes',
@@ -85,7 +85,7 @@ class QuestionController extends Controller
     public function show(string $id)
     {
         try {
-            $question = Question::with('tags', 'answers')->find($id);
+            $question = Question::with(['tags', 'answers.user', 'user'])->find($id);
             if (!$question) {
                 return response()->json([
                     'message' => 'Question non trouvee',

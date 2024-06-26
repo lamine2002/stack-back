@@ -11,4 +11,11 @@ class Tag extends Model
 
     protected $guarded = [];
 
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class);
+    }
+
+
+
 }
