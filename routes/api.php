@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware(['auth:sanctum', SecureRoute::class]);
 
 Route::middleware(['auth:sanctum', SecureRoute::class])->group(function () {
     Route::apiResource('questions', QuestionController::class)->except(['index', 'show']);
@@ -21,6 +21,7 @@ Route::middleware(['auth:sanctum', SecureRoute::class])->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('tags', TagController::class)->except(['index']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
 });
 
 Route::withoutMiddleware([SecureRoute::class])->group(function () {

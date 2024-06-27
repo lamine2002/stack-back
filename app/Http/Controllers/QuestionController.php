@@ -26,7 +26,7 @@ class QuestionController extends Controller
         }
         try {
             // recuperer les questions avec les tags et les reponses associees
-            $questions = Question::with(['tags', 'answers.user', 'user'])->get();
+            $questions = Question::with(['tags', 'answers.user', 'user'])->orderBy('created_at', 'desc')->get();
             return response()->json([
                 'questions' => $questions,
                 'message' => 'Donnees recuperees avec succes',
