@@ -18,6 +18,7 @@ Route::middleware(['auth:sanctum', SecureRoute::class])->group(function () {
     Route::apiResource('answers', AnswerController::class)->except(['index', 'show']);
     Route::put('answers/{answer}/incrementvote', [AnswerController::class, 'incrementVote']);
     Route::put('answers/{answer}/decrementvote', [AnswerController::class, 'decrementVote']);
+    Route::put('answers/{answer}/validate', [AnswerController::class, 'is_validated']);
     Route::apiResource('users', UserController::class);
     Route::apiResource('tags', TagController::class)->except(['index']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -33,7 +34,6 @@ Route::withoutMiddleware([SecureRoute::class])->group(function () {
 });
 /*Route::apiResource('questions', QuestionController::class)->only(['index', 'show']);
 Route::apiResource('answers', AnswerController::class)->only(['index', 'show']);
-//Route::put('answers/{answer}/validate', [AnswerController::class, 'is_validated']);
 Route::apiResource('tags', TagController::class);
 
 

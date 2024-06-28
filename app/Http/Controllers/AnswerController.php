@@ -52,9 +52,9 @@ class AnswerController extends Controller
             }
 
             // Vérifier si la question a été posée par un superviseur
-            if ($question->user->role === 'supervisor') {
+            if ($question->user->role === 'supervisor' || $question->user->role === 'admin') {
                 // Vérifier si l'utilisateur connecté est un superviseur
-                if ($user->role !== 'supervisor') {
+                if ($user->role !== 'supervisor' && $user->role !== 'admin') {
                     return response()->json([
                         'message' => 'Seuls les superviseurs peuvent répondre aux questions posées par les superviseurs',
                         'status' => 403
@@ -187,12 +187,20 @@ class AnswerController extends Controller
         }
     }
 
-    /*public function is_validated(ValidateAnswerRequest $request, Answer $answer)
+    public function is_validated(Answer $answer)
     {
+        $user = Auth()->user();
         try {
-            if (User::where('id', $request->supervisor_id)->first()->role !== 'supervisor') {
+            if ($user->role !== 'supervisor' && $user->role !== 'admin'){
                 return response()->json([
                     'message' => 'Vous n\'etes pas un superviseur',
+                    'status' => 403
+                ], 403);
+            }
+            // Verifier si la reponse a deja ete validee
+            if ($answer->is_validated) {
+                return response()->json([
+                    'message' => 'Cette reponse a deja ete validee',
                     'status' => 403
                 ], 403);
             }
@@ -200,7 +208,7 @@ class AnswerController extends Controller
             $answer->save();
             $answerValidation = AnswerValidation::create([
                 'answer_id' => $answer->id,
-                'supervisor_id' => $request->validated('supervisor_id')
+                'supervisor_id' => $user->id
             ]);
             return response()->json([
                 'answer' => $answer,
@@ -215,7 +223,7 @@ class AnswerController extends Controller
             ], 500);
         }
 
-    }*/
+    }
 
     public function incrementVote(Answer $answer)
     {
