@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Answer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,20 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = $user->createToken('token-name', ['*'], now()->addMinutes(60))->plainTextToken;
+
+            // verifier le nombre de reponses valides pour l'utilisateur ayant repondu
+            $user = User::find($user->id);
+            $number_of_validated_answers = Answer::where('user_id', $user->id)->where('is_validated', true)->count();
+            if ($number_of_validated_answers >= 10) {
+//               // si l'utilisateur est un admin, on ne lui ajoute pas de reputation
+                if ($user->role !== 'admin' && $user->role !== 'supervisor') {
+                    $user->update([
+                        'role' => 'supervisor'
+                    ]);
+
+                }
+            }
+
             return response()->json([
                 'token' => $token,
                 'expireAt' => now()->addMinutes(60)->format('Y-m-d H:i:s'),
