@@ -210,6 +210,16 @@ class AnswerController extends Controller
                 'answer_id' => $answer->id,
                 'supervisor_id' => $user->id
             ]);
+
+            // verifier le nombre de reponses valides pour l'utilisateur ayant repondu
+            $user = User::find($answer->user_id);
+            $number_of_validated_answers = Answer::where('user_id', $user->id)->where('is_validated', true)->count();
+            if ($number_of_validated_answers >= 10) {
+//               // si l'utilisateur est un admin, on ne lui ajoute pas de reputation
+                if ($user->role !== 'admin' && $user->role !== 'supervisor') {
+                    $user->role = 'supervisor';
+                }
+            }
             return response()->json([
                 'answer' => $answer,
                 'answer_validation' => $answerValidation,
