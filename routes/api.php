@@ -6,10 +6,13 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\SecureRoute;
+use App\Models\Answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
+//    $user = $request->user();
+//    $number_of_validated_answers = Answer::where('user_id', $user->id)->where('is_validated', true)->count();
     return $request->user();
 })->middleware(['auth:sanctum', SecureRoute::class]);
 
